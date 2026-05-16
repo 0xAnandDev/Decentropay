@@ -1,8 +1,13 @@
-require("@nomicfoundation/hardhat-toolbox");
-const path = require("path");
+/* require("@nomiclabs/hardhat-ethers");
+require("dotenv").config();
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load .env file explicitly from the root directory
-const dotenv = require("dotenv");
+import dotenv from "dotenv";
 const envPath = path.resolve(__dirname, ".env");
 dotenv.config({ path: envPath });
 
@@ -18,16 +23,21 @@ if (!polygonRpc || polygonRpc === "") {
   console.warn("⚠️  WARNING: POLYGON_AMOY_RPC is not set in .env file.");
 }
 
+*/
+
+require("@nomiclabs/hardhat-ethers");
+require("dotenv").config();
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: "0.8.28",
   networks: {
     localhost: {
-      url: "http://127.0.0.1:8545",
+      url: "http://127.0.0.1:8545"
     },
     polygonAmoy: {
-      url: polygonRpc || "",
-      accounts: privateKey && privateKey !== "" ? [privateKey] : []
+      url: process.env.POLYGON_AMOY_RPC || "",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : []
     }
   }
 };
