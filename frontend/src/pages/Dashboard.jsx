@@ -4,7 +4,7 @@ import { useWallet } from '../context/WalletContext';
 const POLYGON_SCAN_BASE = 'https://polygonscan.com';
 
 export default function Dashboard() {
-  const { account, balance, transactions } = useWallet();
+  const { account, balance, transactions, isWrongNetwork } = useWallet();
 
   // Filter and slice for recent transactions
   const myTransactions = transactions.filter(
@@ -15,7 +15,13 @@ export default function Dashboard() {
   return (
     <div className="page">
       <div className="dashboard-page">
+        {isWrongNetwork && (
+          <div className="network-warning-banner">
+            ⚠️ You are connected to the wrong network. Please switch to Polygon Amoy.
+          </div>
+        )}
         <div className="dashboard-cards">
+
           <div className="dashboard-card">
             <div className="dashboard-card-label">Wallet address</div>
             <div className="dashboard-card-value mono">{account ? `${account.slice(0, 10)}...${account.slice(-8)}` : '—'}</div>

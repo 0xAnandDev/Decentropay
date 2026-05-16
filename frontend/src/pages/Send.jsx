@@ -7,7 +7,7 @@ import { useWallet } from '../context/WalletContext';
 
 export default function Send() {
   const navigate = useNavigate();
-  const { account, contract, fetchTransactions, refreshBalance, setLoading, loading } = useWallet();
+  const { account, contract, fetchTransactions, refreshBalance, setLoading, loading, isWrongNetwork } = useWallet();
   const [tab, setTab] = useState('manual');
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
@@ -23,8 +23,12 @@ export default function Send() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isWrongNetwork) {
+      toast.error('Switch to Polygon Amoy to send payments');
+      return;
+    }
     if (!contract) {
-      toast.error('Contract not loaded');
+      toast.error('Blockchain connection not ready');
       return;
     }
     if (!recipient.trim() || !amount.trim()) {
@@ -61,6 +65,22 @@ export default function Send() {
             <p>Connect MetaMask to use Send.</p>
             <button type="button" className="btn-primary" onClick={() => navigate('/')}>
               Go to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isWrongNetwork) {
+    return (
+      <div className="page">
+        <div className="connect-gate">
+          <div className="connect-gate-card">
+            <h2>Wrong Network</h2>
+            <p>Please switch your MetaMask to Polygon Amoy Testnet.</p>
+            <button type="button" className="btn-primary" onClick={() => window.location.reload()}>
+              Retry Connection
             </button>
           </div>
         </div>

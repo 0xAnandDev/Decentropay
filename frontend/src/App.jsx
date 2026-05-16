@@ -10,12 +10,13 @@ import Receive from './pages/Receive';
 import History from './pages/History';
 
 function AppContent() {
-  const { account, connectWallet } = useWallet();
+  const { account, connectWallet, isWrongNetwork } = useWallet();
 
   return (
     <div className="app-wrap">
       <Background3D />
-      <Navbar account={account} connectWallet={connectWallet} />
+      <Navbar account={account} connectWallet={connectWallet} isWrongNetwork={isWrongNetwork} />
+
       <Toaster
         position="bottom-right"
         toastOptions={{

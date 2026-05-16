@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom';
 
-export default function Navbar({ account, connectWallet }) {
+export default function Navbar({ account, connectWallet, isWrongNetwork }) {
   const navItems = [
     { to: '/', label: 'Home' },
     { to: '/dashboard', label: 'Dashboard' },
@@ -28,20 +28,28 @@ export default function Navbar({ account, connectWallet }) {
         ))}
       </div>
 
-      <button
-        type="button"
-        className={`nav-wallet-btn ${account ? 'connected' : 'disconnected'}`}
-        onClick={!account ? connectWallet : undefined}
-      >
-        {account ? (
-          <>
-            <span className="wallet-dot" />
-            {account.slice(0, 6)}...{account.slice(-4)}
-          </>
-        ) : (
-          'Connect Wallet'
+      <div className="nav-actions">
+        {isWrongNetwork && account && (
+          <span className="network-badge error">
+            Wrong Network
+          </span>
         )}
-      </button>
+        <button
+          type="button"
+          className={`nav-wallet-btn ${account ? 'connected' : 'disconnected'}`}
+          onClick={!account ? connectWallet : undefined}
+        >
+          {account ? (
+            <>
+              <span className="wallet-dot" />
+              {account.slice(0, 6)}...{account.slice(-4)}
+            </>
+          ) : (
+            'Connect Wallet'
+          )}
+        </button>
+      </div>
     </nav>
   );
 }
+

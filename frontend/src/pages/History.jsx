@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useWallet } from '../context/WalletContext';
 
-const EXPLORER_ADDRESS = 'https://polygonscan.com/address/';
+const EXPLORER_ADDRESS = import.meta.env.VITE_EXPLORER_URL || 'https://polygonscan.com/address/';
 
 export default function History() {
   const navigate = useNavigate();

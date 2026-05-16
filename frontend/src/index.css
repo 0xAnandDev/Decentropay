@@ -199,6 +199,28 @@ button {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.network-badge {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.network-badge.error {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--red);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  animation: pulse 2s infinite;
+}
+
 .nav-wallet-btn {
   padding: 10px 20px;
   font-size: 0.9rem;
@@ -703,6 +725,18 @@ button {
   padding: 32px 24px;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.network-warning-banner {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--red);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .dashboard-cards {

@@ -3,7 +3,10 @@ import { ethers } from 'ethers';
 import { toast } from 'react-hot-toast';
 import PaymentGatewayUtils from '../utils/PaymentGateway.json';
 
-const PAYMENT_GATEWAY_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+// Production configuration from environment variables
+const PAYMENT_GATEWAY_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
+const EXPECTED_CHAIN_ID = 80002; // Polygon Amoy Testnet
+const EXPECTED_CHAIN_NAME = 'Polygon Amoy';
 
 const WalletContext = createContext(null);
 
@@ -13,17 +16,17 @@ export function WalletProvider({ children }) {
   const [balance, setBalance] = useState('0.0');
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isWrongNetwork, setIsWrongNetwork] = useState(false);
 
   // Use useCallback to prevent re-creation on every render
   const fetchTransactions = useCallback(async (contractInstance) => {
     if (!contractInstance) return;
     try {
-      console.log('Fetching transactions from contract:', contractInstance.target);
+      console.log('[Blockchain] Fetching history from:', contractInstance.target);
       const txs = await contractInstance.getAllTransactions();
-      console.log('Raw transactions from contract:', txs);
       
       if (!txs || !Array.isArray(txs)) {
-        console.warn('getAllTransactions did not return an array:', txs);
+        console.warn('[Blockchain] No transaction data returned');
         return;
       }
 
@@ -38,15 +41,14 @@ export function WalletProvider({ children }) {
             id: `${tx.from}-${tx.to}-${tx.timestamp}-${index}`
           };
         } catch (err) {
-          console.error('Error formatting individual transaction:', err, tx);
+          console.error('[Blockchain] Formatting error:', err);
           return null;
         }
       }).filter(tx => tx !== null);
 
-      console.log('Formatted transactions:', formatted);
       setTransactions([...formatted].reverse());
     } catch (err) {
-      console.error('Error fetching transactions:', err);
+      console.error('[Blockchain] Fetch error:', err);
     }
   }, []);
 
@@ -57,50 +59,58 @@ export function WalletProvider({ children }) {
       const bal = await provider.getBalance(currentAccount);
       setBalance(ethers.formatEther(bal).substring(0, 6));
     } catch (err) {
-      console.error('Error refreshing balance:', err);
+      console.error('[Blockchain] Balance refresh error:', err);
     }
   }, []);
 
   const initContract = async (ethereum, currentAccount) => {
+    // 1. Validate Environment
+    if (!PAYMENT_GATEWAY_ADDRESS) {
+      console.error('[Config] VITE_CONTRACT_ADDRESS is missing in .env file');
+      toast.error('Configuration error: Contract address missing.', { id: 'config-error' });
+      return;
+    }
+
     try {
       const provider = new ethers.BrowserProvider(ethereum);
       const network = await provider.getNetwork();
-      const chainId = network.chainId;
-      const signer = await provider.getSigner();
+      const chainId = Number(network.chainId);
       
-      console.log('Network connected:', network.name, chainId.toString());
+      console.log(`[Network] Connected to ${network.name} (ID: ${chainId})`);
 
-      // Warning if using default address on non-local network
-      if (PAYMENT_GATEWAY_ADDRESS === '0x5FbDB2315678afecb367f032d93F642f64180aa3' && chainId !== 31337n) {
-        toast.error('Using default contract address on a live network! Please set VITE_CONTRACT_ADDRESS.', { duration: 6000 });
+      // 2. Validate Network
+      if (chainId !== EXPECTED_CHAIN_ID) {
+        setIsWrongNetwork(true);
+        toast.error(`Please switch to ${EXPECTED_CHAIN_NAME} network!`, { id: 'network-error' });
+        return;
       }
+      setIsWrongNetwork(false);
 
-      console.log('Initializing contract at:', PAYMENT_GATEWAY_ADDRESS);
+      const signer = await provider.getSigner();
       const paymentGatewayContract = new ethers.Contract(
         PAYMENT_GATEWAY_ADDRESS,
         PaymentGatewayUtils.abi,
         signer
       );
-
       
       setContract(paymentGatewayContract);
       await refreshBalance(currentAccount);
       await fetchTransactions(paymentGatewayContract);
 
-      // Listen for events
+      // 3. Real-time Event Sync
       paymentGatewayContract.on('PaymentSent', (from, to, amount, message, timestamp) => {
-        console.log('PaymentSent event received:', { from, to, amount, message, timestamp });
-        // Refresh everything when a payment is detected
+        console.log('[Event] PaymentSent detected');
         fetchTransactions(paymentGatewayContract);
         refreshBalance(currentAccount);
-        toast.success('New transaction detected!');
+        toast.success('Transaction confirmed on-chain!');
       });
 
       return () => {
         paymentGatewayContract.removeAllListeners('PaymentSent');
       };
     } catch (err) {
-      console.error('Error initializing contract:', err);
+      console.error('[Blockchain] Initialization error:', err);
+      toast.error('Failed to initialize blockchain connection.');
     }
   };
 
@@ -115,7 +125,7 @@ export function WalletProvider({ children }) {
           await initContract(ethereum, accounts[0]);
         }
       } catch (err) {
-        console.error(err);
+        console.error('[Wallet] Connection check error:', err);
       }
     };
 
@@ -134,9 +144,14 @@ export function WalletProvider({ children }) {
         }
       };
 
+      const handleChainChanged = () => window.location.reload();
+
       window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on('chainChanged', handleChainChanged);
+
       return () => {
         window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener('chainChanged', handleChainChanged);
       };
     }
   }, [fetchTransactions]);
@@ -146,7 +161,7 @@ export function WalletProvider({ children }) {
       const { ethereum } = window;
       if (!ethereum) {
         toast.error('Please install MetaMask!');
-        throw new Error('Please install MetaMask!');
+        return false;
       }
       const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
       setAccount(accounts[0]);
@@ -154,10 +169,8 @@ export function WalletProvider({ children }) {
       toast.success('Wallet connected!');
       return true;
     } catch (err) {
-      if (err?.message !== 'Please install MetaMask!') {
-        toast.error(err?.message || 'Failed to connect');
-      }
-      throw err;
+      toast.error(err?.message || 'Failed to connect wallet');
+      return false;
     }
   };
 
@@ -167,6 +180,7 @@ export function WalletProvider({ children }) {
     balance,
     transactions,
     loading,
+    isWrongNetwork,
     setLoading,
     connectWallet,
     fetchTransactions,
@@ -181,4 +195,5 @@ export function useWallet() {
   if (!ctx) throw new Error('useWallet must be used within WalletProvider');
   return ctx;
 }
+
 
