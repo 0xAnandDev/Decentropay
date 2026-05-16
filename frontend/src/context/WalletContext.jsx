@@ -73,19 +73,37 @@ export function WalletProvider({ children }) {
 
     try {
       const provider = new ethers.BrowserProvider(ethereum);
-      const network = await provider.getNetwork();
-      const chainId = Number(network.chainId);
       
-      console.log(`[Network] Connected to ${network.name} (ID: ${chainId})`);
+      // Fetch chainId from multiple sources for redundancy/validation
+      const network = await provider.getNetwork();
+      const rawChainId = network.chainId;
+      const hexChainId = await ethereum.request({ method: 'eth_chainId' });
+      
+      // Normalize to decimal Number
+      const normalizedChainId = Number(rawChainId);
+      const normalizedHexChainId = Number(hexChainId);
+
+      console.log('[Network Debug]', {
+        rawChainId: rawChainId.toString(),
+        hexChainId: hexChainId,
+        normalizedChainId,
+        normalizedHexChainId,
+        expectedChainId: EXPECTED_CHAIN_ID,
+        match: normalizedChainId === EXPECTED_CHAIN_ID
+      });
 
       // 2. Validate Network
-      if (chainId !== EXPECTED_CHAIN_ID) {
+      if (normalizedChainId !== EXPECTED_CHAIN_ID) {
+        console.warn(`[Network] Wrong network detected. Expected ${EXPECTED_CHAIN_ID}, got ${normalizedChainId}`);
         setIsWrongNetwork(true);
         toast.error(`Please switch to ${EXPECTED_CHAIN_NAME} network!`, { id: 'network-error' });
+        setContract(null);
         return;
       }
+      
       setIsWrongNetwork(false);
-
+      console.log(`[Network] Confirmed connection to ${EXPECTED_CHAIN_NAME}`);
+      
       const signer = await provider.getSigner();
       const paymentGatewayContract = new ethers.Contract(
         PAYMENT_GATEWAY_ADDRESS,
@@ -113,6 +131,7 @@ export function WalletProvider({ children }) {
       toast.error('Failed to initialize blockchain connection.');
     }
   };
+
 
   useEffect(() => {
     const checkIfWalletIsConnected = async () => {
