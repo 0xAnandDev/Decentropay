@@ -6,7 +6,11 @@ const POLYGON_SCAN_BASE = 'https://polygonscan.com';
 export default function Dashboard() {
   const { account, balance, transactions } = useWallet();
 
-  const recent = transactions.slice(0, 10);
+  // Filter and slice for recent transactions
+  const myTransactions = transactions.filter(
+    (tx) => tx.from.toLowerCase() === account?.toLowerCase() || tx.to.toLowerCase() === account?.toLowerCase()
+  );
+  const recent = myTransactions.slice(0, 10);
 
   return (
     <div className="page">
@@ -41,11 +45,11 @@ export default function Dashboard() {
               <span className="recent-item-msg">No transactions yet</span>
             </div>
           ) : (
-            recent.map((tx, i) => {
+            recent.map((tx) => {
               const isReceived = tx.to.toLowerCase() === account?.toLowerCase();
               return (
                 <div
-                  key={`${tx.from}-${tx.to}-${tx.timestamp}-${i}`}
+                  key={tx.id}
                   className={`recent-item ${isReceived ? 'received' : ''}`}
                 >
                   <div className="recent-item-icon">{isReceived ? '⬇' : '⬆'}</div>
@@ -68,3 +72,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

@@ -23,18 +23,23 @@ export default function History() {
     );
   }
 
+  // Filter transactions related to the current account
+  const myTransactions = transactions.filter(
+    (tx) => tx.from.toLowerCase() === account.toLowerCase() || tx.to.toLowerCase() === account.toLowerCase()
+  );
+
   return (
     <div className="page">
       <div className="history-page">
         <h1 className="history-title">Transaction history</h1>
         <div className="history-list">
-          {transactions.length === 0 ? (
+          {myTransactions.length === 0 ? (
             <div className="history-empty">No transactions yet. Send or receive to see history here.</div>
           ) : (
-            transactions.map((tx, i) => {
+            myTransactions.map((tx) => {
               const isReceived = tx.to.toLowerCase() === account.toLowerCase();
               return (
-                <div key={`${tx.from}-${tx.to}-${tx.timestamp}-${i}`} className="history-item">
+                <div key={tx.id} className="history-item">
                   <span className={`history-badge ${isReceived ? 'received' : 'sent'}`}>
                     {isReceived ? 'Received' : 'Sent'}
                   </span>
@@ -63,3 +68,4 @@ export default function History() {
     </div>
   );
 }
+
