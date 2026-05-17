@@ -68,31 +68,42 @@ Built with Solidity, React, Ethers.js, and deployed on the Polygon Amoy Testnet.
 
 ---
 
-## 📸 Project Screenshots
+## 📸 Application Walkthrough & Proof of State
 
-### MetaMask Transaction Confirmation
+To ensure a clean, readable layout, all walk-through screenshots are optimized and structured in a professional grid.
 
-![MetaMask Confirmation](assets/screenshots/metamask-confirmation.png)
+### 1. MetaMask Transaction Flow
+<div align="center">
+  <p><i>The secure payment flow with MetaMask gas-optimized confirmation on Polygon Amoy.</i></p>
+  <img src="assets/screenshots/metamask-confirmation.png" width="680" alt="MetaMask Confirmation" style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);" />
+</div>
 
----
+<br />
 
-### Successful Transaction
+### 2. Balance Verification & On-Chain History
+<div align="center">
+  <p><i>Real-time updates of successful transfers and dynamic historical records.</i></p>
+  <table>
+    <tr>
+      <td align="center" width="340">
+        <p><b>✨ Balance & State Update</b></p>
+        <img src="assets/screenshots/balance-update.png" width="330" alt="Transaction Success" style="border-radius: 6px; border: 1px solid #e2e8f0;" />
+      </td>
+      <td align="center" width="340">
+        <p><b>📜 On-Chain History</b></p>
+        <img src="assets/screenshots/transaction-history.png" width="330" alt="Transaction History" style="border-radius: 6px; border: 1px solid #e2e8f0;" />
+      </td>
+    </tr>
+  </table>
+</div>
 
-![Transaction Success](assets/screenshots/balance-update.png)
+<br />
 
----
-
-### On-Chain Transaction History
-
-![Transaction History](assets/screenshots/transaction-history.png)
-
----
-
-### PolygonScan Transaction Verification
-
-![PolygonScan Verification](assets/screenshots/polygonscan-proof.png)
-
----
+### 3. Block Explorer Validation
+<div align="center">
+  <p><i>Immutable confirmation of transactions and smart contract logs on PolygonScan.</i></p>
+  <img src="assets/screenshots/polygonscan-proof.png" width="680" alt="PolygonScan Verification" style="border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);" />
+</div>
 
 ## ⚙️ Local Setup
 
