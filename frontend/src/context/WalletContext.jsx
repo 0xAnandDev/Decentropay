@@ -89,7 +89,8 @@ export function WalletProvider({ children }) {
         normalizedChainId,
         normalizedHexChainId,
         expectedChainId: EXPECTED_CHAIN_ID,
-        match: normalizedChainId === EXPECTED_CHAIN_ID
+        match: normalizedChainId === EXPECTED_CHAIN_ID,
+        contractAddress: PAYMENT_GATEWAY_ADDRESS
       });
 
       // 2. Validate Network
@@ -101,8 +102,16 @@ export function WalletProvider({ children }) {
         return;
       }
       
+      // 3. Strict Contract Validation (No Hardhat address on live networks)
+      if (PAYMENT_GATEWAY_ADDRESS === '0x5FbDB2315678afecb367f032d93F642f64180aa3' && normalizedChainId !== 31337) {
+        console.error('[Config] Invalid contract address for this network');
+        toast.error('Production Error: Localhost address used on live network.', { id: 'config-error' });
+        setContract(null);
+        return;
+      }
+
       setIsWrongNetwork(false);
-      console.log(`[Network] Confirmed connection to ${EXPECTED_CHAIN_NAME}`);
+      console.log(`[Network] Confirmed connection to ${EXPECTED_CHAIN_NAME} using contract ${PAYMENT_GATEWAY_ADDRESS}`);
       
       const signer = await provider.getSigner();
       const paymentGatewayContract = new ethers.Contract(
@@ -110,6 +119,7 @@ export function WalletProvider({ children }) {
         PaymentGatewayUtils.abi,
         signer
       );
+
       
       setContract(paymentGatewayContract);
       await refreshBalance(currentAccount);
@@ -193,6 +203,8 @@ export function WalletProvider({ children }) {
     }
   };
 
+  const currencySymbol = EXPECTED_CHAIN_ID === 80002 ? 'POL' : 'ETH';
+
   const value = {
     account,
     contract,
@@ -200,6 +212,7 @@ export function WalletProvider({ children }) {
     transactions,
     loading,
     isWrongNetwork,
+    currencySymbol,
     setLoading,
     connectWallet,
     fetchTransactions,

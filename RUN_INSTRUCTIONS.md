@@ -29,13 +29,12 @@ Open a **new terminal**, go to the project root, and run:
 npx hardhat run scripts/deploy.js --network localhost
 ```
 Copy the deployed address from the output (e.g., `PaymentGateway deployed to: 0x...`).
-**Note:** The default address is usually `0x5FbDB2315678afecb367f032d93F642f64180aa3` if it's the first key, but confirming in output is best.
 
 ## Step 4: Configure Frontend
-1. Open [`frontend/src/App.jsx`](file:///c:/Users/USER/OneDrive/Blockchain_projects/QR-PaymentDapp/decentropay/frontend/src/App.jsx).
-2. Update the `PAYMENT_GATEWAY_ADDRESS` constant (line 8) with the address you copied in Step 3.
-   ```javascript
-   const PAYMENT_GATEWAY_ADDRESS = "YOUR_COPIED_ADDRESS";
+1. Open [`frontend/.env`](file:///c:/BlockchainProjects/Decentorpay/frontend/.env).
+2. Update the `VITE_CONTRACT_ADDRESS` variable with the address you copied in Step 3.
+   ```env
+   VITE_CONTRACT_ADDRESS=YOUR_COPIED_ADDRESS
    ```
 
 ## Step 5: Run Frontend

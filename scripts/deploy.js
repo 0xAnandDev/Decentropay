@@ -1,10 +1,13 @@
-import hre from "hardhat";
+const { ethers } = require("hardhat");
 
 async function main() {
-    const PaymentGateway = await hre.ethers.getContractFactory("PaymentGateway");
+    const PaymentGateway = await ethers.getContractFactory("PaymentGateway");
+
     const paymentGateway = await PaymentGateway.deploy();
+
     await paymentGateway.waitForDeployment();
-    console.log("PaymentGateway deployed to:", await paymentGateway.getAddress());
+
+    console.log("Contract deployed to:", await paymentGateway.getAddress());
 }
 
 main().catch((error) => {

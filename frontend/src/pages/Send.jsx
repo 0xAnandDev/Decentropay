@@ -7,7 +7,7 @@ import { useWallet } from '../context/WalletContext';
 
 export default function Send() {
   const navigate = useNavigate();
-  const { account, contract, fetchTransactions, refreshBalance, setLoading, loading, isWrongNetwork } = useWallet();
+  const { account, contract, fetchTransactions, refreshBalance, setLoading, loading, isWrongNetwork, currencySymbol } = useWallet();
   const [tab, setTab] = useState('manual');
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
@@ -38,7 +38,18 @@ export default function Send() {
     try {
       setLoading(true);
       const parsed = ethers.parseEther(amount);
-      const tx = await contract.sendPayment(recipient.trim(), message.trim() || '', { value: parsed });
+
+      // Gas price fix for Polygon Amoy
+      // Amoy requires a minimum tip cap of 25 Gwei (25000000000)
+      console.log('[Send] Formatting transaction with custom gas overrides for Amoy');
+      const overrides = {
+        value: parsed,
+        maxPriorityFeePerGas: ethers.parseUnits('30', 'gwei'), // 30 Gwei tip cap (comfortably above 25 Gwei)
+        maxFeePerGas: ethers.parseUnits('35', 'gwei'),        // 35 Gwei max fee (lowered to save balance reservation)
+        gasLimit: 250000                                       // Manual gas limit of 250,000 to prevent Out-of-Gas reverts!
+      };
+
+      const tx = await contract.sendPayment(recipient.trim(), message.trim() || '', overrides);
       toast.loading('Processing...', { id: 'send' });
       await tx.wait();
       toast.success('Payment sent!', { id: 'send' });
@@ -55,6 +66,7 @@ export default function Send() {
       setLoading(false);
     }
   };
+
 
   if (!account) {
     return (
@@ -135,7 +147,7 @@ export default function Send() {
               />
             </div>
             <div className="form-group">
-              <label>Amount (ETH)</label>
+              <label>Amount ({currencySymbol || 'POL'})</label>
               <input
                 type="number"
                 step="0.0001"

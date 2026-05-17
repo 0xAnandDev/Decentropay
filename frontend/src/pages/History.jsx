@@ -5,7 +5,7 @@ const EXPLORER_ADDRESS = import.meta.env.VITE_EXPLORER_URL || 'https://polygonsc
 
 export default function History() {
   const navigate = useNavigate();
-  const { account, transactions } = useWallet();
+  const { account, transactions, currencySymbol } = useWallet();
 
   if (!account) {
     return (
@@ -49,7 +49,7 @@ export default function History() {
                   <div className="history-msg">{tx.message || '—'}</div>
                   <div className="history-time">{tx.timestamp}</div>
                   <div className={`history-amount ${isReceived ? 'received' : 'sent'}`}>
-                    {isReceived ? '+' : '-'}{tx.amount} ETH
+                    {isReceived ? '+' : '-'}{tx.amount} {currencySymbol || 'POL'}
                   </div>
                   <a
                     href={`${EXPLORER_ADDRESS}${account}`}
@@ -57,7 +57,7 @@ export default function History() {
                     rel="noopener noreferrer"
                     className="history-link"
                   >
-                    PolygonScan →
+                    Explorer →
                   </a>
                 </div>
               );
@@ -68,4 +68,5 @@ export default function History() {
     </div>
   );
 }
+
 

@@ -4,7 +4,7 @@ import { useWallet } from '../context/WalletContext';
 const POLYGON_SCAN_BASE = 'https://polygonscan.com';
 
 export default function Dashboard() {
-  const { account, balance, transactions, isWrongNetwork } = useWallet();
+  const { account, balance, transactions, isWrongNetwork, currencySymbol } = useWallet();
 
   // Filter and slice for recent transactions
   const myTransactions = transactions.filter(
@@ -28,7 +28,7 @@ export default function Dashboard() {
           </div>
           <div className="dashboard-card">
             <div className="dashboard-card-label">Balance</div>
-            <div className="dashboard-card-value">{balance} ETH</div>
+            <div className="dashboard-card-value">{balance} {currencySymbol || 'POL'}</div>
           </div>
         </div>
 
@@ -67,7 +67,7 @@ export default function Dashboard() {
                     <div className="recent-item-time">{tx.timestamp}</div>
                   </div>
                   <div className={`recent-item-amount ${isReceived ? 'received' : 'sent'}`}>
-                    {isReceived ? '+' : '-'}{tx.amount} ETH
+                    {isReceived ? '+' : '-'}{tx.amount} {currencySymbol || 'POL'}
                   </div>
                 </div>
               );
@@ -78,4 +78,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
 
